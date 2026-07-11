@@ -94,7 +94,7 @@
     overflow:hidden;
     display:flex;
     flex-direction:column;
-    height:min(60vh, 520px);
+    height:min(65vh, 540px);
     animation:fadeUp 0.8s ease both 0.1s;
     border:1px solid var(--border);
   }
@@ -162,7 +162,7 @@
   .send-btn svg{ width:18px; height:18px; }
   footer{ margin:16px 0 22px; font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--ink-soft); opacity:0.7; text-align:center; position:relative; z-index:1; }
   @media (max-width:480px){
-    .chat-shell{ height:66vh; border-radius:30px 30px 24px 24px; }
+    .chat-shell{ height:70vh; border-radius:30px 30px 24px 24px; }
     .hero h1{ font-size:24px; }
     .speech-bubble{ right:-46px; font-size:11px; }
   }
@@ -249,13 +249,7 @@
   body[data-state="listening"] #eyeL, body[data-state="listening"] #eyeR{ transform:translateY(-1px) scaleY(1.1); }
   body[data-state="thinking"] #teddy{ animation: tilt 1.4s ease-in-out infinite; }
   @keyframes tilt{ 0%,100%{ transform:rotate(0deg);} 50%{ transform:rotate(3deg);} }
-  body[data-state="thinking"] #mouth{ d: path("M 88 136 Q 100 132 112 136"); }
   body[data-state="thinking"] #eyeL, body[data-state="thinking"] #eyeR{ transform:scaleY(0.5); }
-  body[data-state="talking"] #mouth{ animation: talk 0.4s ease-in-out infinite; }
-  @keyframes talk{
-    0%,100%{ d: path("M 84 134 Q 100 144 116 134"); }
-    50%{ d: path("M 88 132 Q 100 150 112 132"); }
-  }
   body[data-state="talking"] #armR{ animation: wave 0.5s ease-in-out 2; }
   @keyframes wave{ 0%,100%{ transform:rotate(0deg);} 50%{ transform:rotate(-20deg);} }
 </style>
@@ -266,17 +260,25 @@
   const inputEl = document.getElementById('userInput');
   const sendBtn = document.getElementById('sendBtn');
   const bubble = document.getElementById('speechBubble');
+  const mouth = document.getElementById('mouth');
 
   body.setAttribute('data-state', 'idle');
   setTimeout(()=>{ bubble.style.opacity = '1'; }, 300);
   setTimeout(()=>{ bubble.style.transition = 'opacity 0.5s'; bubble.style.opacity = '0'; }, 3500);
 
-  function setState(state){ body.setAttribute('data-state', state); }
+  function setState(state){ 
+    body.setAttribute('data-state', state); 
+    if(state === 'thinking') {
+      mouth.setAttribute('d', 'M 88 136 Q 100 132 112 136');
+    } else if(state === 'idle' || state === 'listening') {
+      mouth.setAttribute('d', 'M 84 134 Q 100 144 116 134');
+    }
+  }
 
   inputEl.addEventListener('input', ()=>{
     setState(inputEl.value.length ? 'listening' : 'idle');
   });
-  inputEl.addEventListener('blur', ()=> setState('idle'));
+  inputEl.addEventListener('blur', ()=> { if(!inputEl.value.length) setState('idle'); });
 
   function addMessage(text, sender){
     const div = document.createElement('div');
@@ -294,17 +296,58 @@
     messagesEl.appendChild(div);
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
+  
   function hideTyping(){
     const t = document.getElementById('typingIndicator');
     if(t) t.remove();
   }
 
+  let talkInterval;
+  function startTalkingMouth(){
+    let open = false;
+    talkInterval = setInterval(()=>{
+      mouth.setAttribute('d', open ? 'M 84 134 Q 100 144 116 134' : 'M 88 132 Q 100 150 112 132');
+      open = !open;
+    }, 200);
+  }
+  function stopTalkingMouth(){
+    clearInterval(talkInterval);
+    mouth.setAttribute('d', 'M 84 134 Q 100 144 116 134');
+  }
+
+  // --- CONNECTED TO GROK API ---
   async function getBotReply(userText){
-    return new Promise(resolve=>{
-      setTimeout(()=>{
-        resolve("Demo reply — connect getBotReply() to your Gemini backend for real answers.");
-      }, 1200);
-    });
+    try {
+      // ⚠️ Apni asli Grok API key niche string me daalna mat bhulna!
+      const apiKey = "YOUR_GROK_API_KEY"; 
+      
+      const response = await fetch("https://api.x.ai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          messages: [
+            { role: "system", content: "You are Akki Bot, a super cool, friendly bear AI buddy." },
+            { role: "user", content: userText }
+          ],
+          model: "grok-2-1212", 
+          stream: false,
+          temperature: 0.7
+        })
+      });
+
+      const data = await response.json();
+      if(data.choices && data.choices[0].message) {
+        return data.choices[0].message.content;
+      } else {
+        return "Oops! Grok API se correct format me data nahi mila.";
+      }
+    } catch (error) {
+      console.error("API Error:", error);
+      return "Teddy network issue face kar raha hai ya Grok API keys pending hain! 🐻";
+    }
   }
 
   async function handleSend(){
@@ -314,11 +357,18 @@
     inputEl.value = '';
     setState('thinking');
     showTyping();
+    
     const reply = await getBotReply(text);
+    
     hideTyping();
     setState('talking');
+    startTalkingMouth();
     addMessage(reply, 'bot');
-    setTimeout(()=> setState('idle'), 900);
+    
+    setTimeout(()=> {
+      setState('idle');
+      stopTalkingMouth();
+    }, 1200);
   }
 
   sendBtn.addEventListener('click', handleSend);
@@ -326,7 +376,11 @@
 
   document.getElementById('teddy').addEventListener('click', ()=>{
     setState('talking');
-    setTimeout(()=> setState('idle'), 1000);
+    startTalkingMouth();
+    setTimeout(()=> {
+      setState('idle');
+      stopTalkingMouth();
+    }, 1000);
   });
 </script>
 </body>
