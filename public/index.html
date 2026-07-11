@@ -4,272 +4,291 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Akki Bot AI</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
-            --bg-main: #140b07;
-            --panel-bg: #22120b;
-            --accent-cream: #f4eee1;
-            --text-main: #ffffff;
-            --text-dark: #140b07;
-            --user-bubble: #3a2216;
-            --border-glow: rgba(244, 238, 225, 0.12);
+            --bg-gradient: linear-gradient(135deg, #e0f2fe 0%, #f8fafc 100%); /* Light Sky Blue to Soft White */
+            --primary-blue: #0284c7; /* Professional Sky Blue */
+            --dark-blue: #0f172a; /* Deep Slate Blue for Text/Headers */
+            --white: #ffffff;
+            --chat-bg: #f1f5f9;
+            --text-main: #334155;
+            --shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.1), 0 8px 10px -6px rgba(2, 132, 199, 0.1);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Inter', sans-serif;
         }
 
         body {
-            background-color: var(--bg-main);
-            background-image: radial-gradient(circle at top right, #2d180f 0%, #140b07 100%);
+            background: var(--bg-gradient);
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             color: var(--text-main);
-            overflow: hidden;
         }
 
-        .container {
-            width: 95%;
-            max-width: 900px;
+        /* Main Glassmorphism Container */
+        .chat-container {
+            width: 100%;
+            max-width: 450px;
             height: 85vh;
-            background: rgba(34, 18, 11, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border-glow);
-            border-radius: 28px;
+            background: var(--white);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            border: 1px solid rgba(14, 165, 233, 0.15);
         }
 
-        .header {
-            padding: 24px 32px;
-            background: rgba(20, 11, 7, 0.6);
-            border-bottom: 1px solid var(--border-glow);
+        /* Top Header Styling */
+        .chat-header {
+            background: linear-gradient(135deg, var(--dark-blue) 0%, #1e293b 100%);
+            color: var(--white);
+            padding: 20px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            border-top-left-radius: 28px;
-            border-top-right-radius: 28px;
+            gap: 15px;
+            border-bottom: 3px solid var(--primary-blue);
         }
 
-        .bot-profile {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .avatar {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, #ffffff, var(--accent-cream));
-            border-radius: 16px;
+        .bot-avatar {
+            width: 45px;
+            height: 45px;
+            background: rgba(2, 132, 199, 0.2);
+            border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-weight: 700;
-            color: var(--text-dark);
-            box-shadow: 0 8px 20px rgba(244, 238, 225, 0.15);
+            border: 2px solid var(--primary-blue);
+            color: var(--primary-blue);
+            font-size: 20px;
+            box-shadow: 0 0 10px rgba(2, 132, 199, 0.5);
         }
 
-        .bot-meta h1 {
-            font-size: 1.25rem;
+        .bot-info h3 {
+            font-size: 16px;
             font-weight: 600;
-            letter-spacing: -0.3px;
+            letter-spacing: 0.5px;
         }
 
-        .status {
+        .bot-status {
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 0.8rem;
-            color: #a3e635;
+            gap: 5px;
+            font-size: 12px;
+            color: #38bdf8; /* Soft Sky Blue */
             margin-top: 2px;
         }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #a3e635;
+            width: 7px;
+            height: 7px;
+            background-color: #4ade80; /* Online Green */
             border-radius: 50%;
-            box-shadow: 0 0 10px #a3e635;
+            animation: pulse 1.5s infinite;
         }
 
-        .chat-area {
+        /* Chat Body / Messages Area */
+        .chat-messages {
             flex: 1;
-            padding: 32px;
+            padding: 20px;
             overflow-y: auto;
+            background-color: #fafafa;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 15px;
         }
 
-        .chat-area::-webkit-scrollbar {
-            width: 5px;
-        }
-        .chat-area::-webkit-scrollbar-thumb {
-            background: rgba(244, 238, 225, 0.1);
-            border-radius: 10px;
-        }
-
-        .msg {
-            max-width: 80%;
-            padding: 16px 24px;
-            border-radius: 20px;
-            font-size: 0.98rem;
-            line-height: 1.6;
-            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        .message {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 2px;
         }
 
-        .user-msg {
-            background-color: var(--user-bubble);
-            color: var(--text-main);
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
-            border: 1px solid rgba(244, 238, 225, 0.05);
-        }
-
+        /* Bot Message (Left Side) */
         .bot-msg {
-            background-color: var(--accent-cream);
-            color: var(--text-dark);
+            background-color: var(--chat-bg);
+            color: var(--dark-blue);
             align-self: flex-start;
-            border-bottom-left-radius: 4px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            border-top-left-radius: 4px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
-        .footer {
-            padding: 24px 32px;
-            background: rgba(20, 11, 7, 0.6);
-            border-top: 1px solid var(--border-glow);
-            border-bottom-left-radius: 28px;
-            border-bottom-right-radius: 28px;
+        /* User Message (Right Side) */
+        .user-msg {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #0369a1 100%);
+            color: var(--white);
+            align-self: flex-end;
+            border-top-right-radius: 4px;
+            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.2);
         }
 
-        .input-box {
+        /* Input Area Footer */
+        .chat-input-area {
+            padding: 15px 20px;
+            background: var(--white);
+            border-top: 1px solid #e2e8f0;
             display: flex;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(244, 238, 225, 0.15);
-            border-radius: 18px;
-            padding: 8px 8px 8px 20px;
             align-items: center;
-            transition: all 0.3s ease;
+            gap: 12px;
         }
 
-        .input-box:focus-within {
-            border-color: rgba(244, 238, 225, 0.4);
-            background: rgba(255, 255, 255, 0.06);
-            box-shadow: 0 0 20px rgba(244, 238, 225, 0.05);
-        }
-
-        input {
+        .input-wrapper {
+            position: relative;
             flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: var(--text-main);
-            font-size: 1rem;
         }
 
-        input::placeholder {
-            color: rgba(255, 255, 255, 0.3);
+        #userInput {
+            width: 100%;
+            padding: 14px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 30px;
+            outline: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background-color: #f8fafc;
         }
 
-        button {
-            background: var(--accent-cream);
-            color: var(--text-dark);
+        #userInput:focus {
+            border-color: var(--primary-blue);
+            background-color: var(--white);
+            box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #0369a1 100%);
+            color: var(--white);
             border: none;
-            outline: none;
-            padding: 14px 28px;
-            border-radius: 14px;
-            font-weight: 600;
-            font-size: 0.95rem;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             cursor: pointer;
             transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
         }
 
-        button:hover {
-            background: #ffffff;
-            transform: translateY(-1px);
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(2, 132, 199, 0.4);
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(16px); }
-            to { opacity: 1; transform: translateY(0); }
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Animation */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Custom Scrollbar */
+        .chat-messages::-webkit-scrollbar {
+            width: 5px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="header">
-            <div class="bot-profile">
-                <div class="avatar">⚡</div>
-                <div class="bot-meta">
-                    <h1>Akki Bot</h1>
-                    <div class="status">
-                        <div class="status-dot"></div>
-                        <span>Llama 3.3 Engine • Active</span>
-                    </div>
+    <div class="chat-container">
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="bot-avatar">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+            <div class="bot-info">
+                <h3>Akki Bot AI</h3>
+                <div class="bot-status">
+                    <span class="status-dot"></span>
+                    <span>Online & Ready</span>
                 </div>
             </div>
         </div>
 
-        <div class="chat-area" id="chatArea">
-            <div class="msg bot-msg">
-                Hey Akki! New premium UI integration complete. Pucho kya puchna hai!
+        <!-- Messages Area -->
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot-msg">
+                Hello Akki! Main aapka customized AI assistant hoon. Main aaj aapki kya help kar sakta hoon?
             </div>
         </div>
 
-        <div class="footer">
-            <div class="input-box">
-                <input type="text" id="userInput" placeholder="Ask Akki Bot anything..." onkeypress="checkKey(event)">
-                <button onclick="sendMessage()">Send</button>
+        <!-- Input Box -->
+        <div class="chat-input-area">
+            <div class="input-wrapper">
+                <input type="text" id="userInput" placeholder="Type a professional message..." autocomplete="off">
             </div>
+            <button class="send-btn" id="sendBtn">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
         </div>
     </div>
 
     <script>
-        const chatArea = document.getElementById('chatArea');
+        const chatMessages = document.getElementById('chatMessages');
         const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
 
         async function sendMessage() {
             const text = userInput.value.trim();
             if (!text) return;
 
+            // Append User Message UI
+            appendMessage(text, 'user-msg');
             userInput.value = '';
-            chatArea.innerHTML += `<div class="msg user-msg">${text}</div>`;
-            chatArea.scrollTop = chatArea.scrollHeight;
-
-            const tempId = 'load-' + Date.now();
-            chatArea.innerHTML += `<div class="msg bot-msg" id="${tempId}">Thinking...</div>`;
-            chatArea.scrollTop = chatArea.scrollHeight;
 
             try {
-                const res = await fetch('/chat', {
+                // Fetch Request to your backend route
+                const response = await fetch('/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: text })
                 });
-                const data = await res.json();
-                document.getElementById(tempId).outerHTML = `<div class="msg bot-msg">${data.reply}</div>`;
-            } catch (err) {
-                document.getElementById(tempId).outerHTML = `<div class="msg bot-msg" style="color: #f87171;">Connection error.</div>`;
+                
+                const data = await response.json();
+                
+                // Append Bot Response UI
+                if (data.reply) {
+                    appendMessage(data.reply, 'bot-msg');
+                } else if (data.error) {
+                    appendMessage("Error: Something went wrong.", 'bot-msg');
+                }
+            } catch (error) {
+                appendMessage("Server unreachable. Please check connection.", 'bot-msg');
             }
-            chatArea.scrollTop = chatArea.scrollHeight;
         }
 
-        function checkKey(e) {
-            if (e.key === 'Enter') sendMessage();
+        function appendMessage(text, className) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message', className);
+            msgDiv.innerText = text;
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight; // Auto Scroll to bottom
         }
+
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
     </script>
 </body>
 </html>
