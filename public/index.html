@@ -90,16 +90,6 @@
 </div>
 
 <script>
-  // Dynamic secure string loading to clear CORS and scanner rules
-  const buildKey = () => {
-    const k1 = "gsk_ND2eENV0";
-    const k2 = "uOwTJ1ulrZsZ";
-    const k3 = "WGdyb3FYNogr";
-    const k4 = "Sf2Up5jWLsntS";
-    const k5 = "2ihRsAe";
-    return k1 + k2 + k3 + k4 + k5;
-  };
-
   const body = document.body;
   const messagesEl = document.getElementById('messages');
   const inputEl = document.getElementById('userInput');
@@ -134,36 +124,14 @@
 
   async function getBotReply(text) {
     try {
-      const target = "https://api.groq.com/openai/v1/chat/completions";
-      const headers = {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + buildKey()
-      };
-      const payload = {
-        messages: [
-          { role: "system", content: "You are Akki Bot, a super cool friendly AI buddy created by Akki. Keep replies short and interesting." },
-          { role: "user", content: text }
-        ],
-        model: "llama-3.3-70b-versatile",
-        temperature: 0.7
-      };
-
-      const response = await fetch(target, {
+      const response = await fetch("/api/chat", {
         method: "POST",
-        mode: "cors",
-        headers: headers,
-        body: JSON.stringify(payload)
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
       });
-      
       const data = await response.json();
-      if(data && data.choices && data.choices[0]) {
-        return data.choices[0].message.content;
-      }
-      return "Response clean nahi aaya, ek baar check karein.";
-    } catch (e) { 
-      console.error(e);
-      return "Connection smooth nahi hai, dynamic fetching retry karein!"; 
-    }
+      return data.reply;
+    } catch (e) { return "Teddy connected nahi ho pa raha hai backend MCP router se! 🐻"; }
   }
 
   async function handleSend() {
