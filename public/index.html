@@ -1,295 +1,333 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Akki Bot AI</title>
-    <!-- Google Fonts & FontAwesome Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        :root {
-            --bg-gradient: linear-gradient(135deg, #e0f2fe 0%, #f8fafc 100%); /* Light Sky Blue to Soft White */
-            --primary-blue: #0284c7; /* Professional Sky Blue */
-            --dark-blue: #0f172a; /* Deep Slate Blue for Text/Headers */
-            --white: #ffffff;
-            --chat-bg: #f1f5f9;
-            --text-main: #334155;
-            --shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.1), 0 8px 10px -6px rgba(2, 132, 199, 0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background: var(--bg-gradient);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--text-main);
-        }
-
-        /* Main Glassmorphism Container */
-        .chat-container {
-            width: 100%;
-            max-width: 450px;
-            height: 85vh;
-            background: var(--white);
-            border-radius: 24px;
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            border: 1px solid rgba(14, 165, 233, 0.15);
-        }
-
-        /* Top Header Styling */
-        .chat-header {
-            background: linear-gradient(135deg, var(--dark-blue) 0%, #1e293b 100%);
-            color: var(--white);
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            border-bottom: 3px solid var(--primary-blue);
-        }
-
-        .bot-avatar {
-            width: 45px;
-            height: 45px;
-            background: rgba(2, 132, 199, 0.2);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 2px solid var(--primary-blue);
-            color: var(--primary-blue);
-            font-size: 20px;
-            box-shadow: 0 0 10px rgba(2, 132, 199, 0.5);
-        }
-
-        .bot-info h3 {
-            font-size: 16px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .bot-status {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 12px;
-            color: #38bdf8; /* Soft Sky Blue */
-            margin-top: 2px;
-        }
-
-        .status-dot {
-            width: 7px;
-            height: 7px;
-            background-color: #4ade80; /* Online Green */
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
-        }
-
-        /* Chat Body / Messages Area */
-        .chat-messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background-color: #fafafa;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .message {
-            max-width: 75%;
-            padding: 12px 16px;
-            border-radius: 16px;
-            font-size: 14px;
-            line-height: 1.5;
-            margin-bottom: 2px;
-        }
-
-        /* Bot Message (Left Side) */
-        .bot-msg {
-            background-color: var(--chat-bg);
-            color: var(--dark-blue);
-            align-self: flex-start;
-            border-top-left-radius: 4px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        /* User Message (Right Side) */
-        .user-msg {
-            background: linear-gradient(135deg, var(--primary-blue) 0%, #0369a1 100%);
-            color: var(--white);
-            align-self: flex-end;
-            border-top-right-radius: 4px;
-            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.2);
-        }
-
-        /* Input Area Footer */
-        .chat-input-area {
-            padding: 15px 20px;
-            background: var(--white);
-            border-top: 1px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .input-wrapper {
-            position: relative;
-            flex: 1;
-        }
-
-        #userInput {
-            width: 100%;
-            padding: 14px 20px;
-            border: 2px solid #e2e8f0;
-            border-radius: 30px;
-            outline: none;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            background-color: #f8fafc;
-        }
-
-        #userInput:focus {
-            border-color: var(--primary-blue);
-            background-color: var(--white);
-            box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
-        }
-
-        .send-btn {
-            background: linear-gradient(135deg, var(--primary-blue) 0%, #0369a1 100%);
-            color: var(--white);
-            border: none;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
-        }
-
-        .send-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 16px rgba(2, 132, 199, 0.4);
-        }
-
-        .send-btn:active {
-            transform: scale(0.95);
-        }
-
-        /* Animation */
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.5; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        /* Custom Scrollbar */
-        .chat-messages::-webkit-scrollbar {
-            width: 5px;
-        }
-        .chat-messages::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 10px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Akki Bot — Your AI Buddy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #FFF6EC;
+    --blob1: #FFD9C4;
+    --blob2: #E7DBFF;
+    --surface: #FFFFFF;
+    --ink: #3B2E27;
+    --ink-soft: #8A7A70;
+    --coral: #FF8A73;
+    --coral-deep: #F16A50;
+    --violet: #9D8CFF;
+    --honey: #C9884F;
+    --honey-light: #F2C79A;
+    --border: #F1E4D8;
+    --shadow: 0 14px 40px rgba(59,46,39,0.08);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Nunito', sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    overflow-x:hidden;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:0 16px;
+    position:relative;
+  }
+  .bg-blob{
+    position:fixed;
+    border-radius:50%;
+    filter:blur(10px);
+    opacity:0.55;
+    z-index:0;
+    animation:drift 12s ease-in-out infinite;
+  }
+  .bg-blob.b1{ width:280px; height:280px; background:var(--blob1); top:-60px; left:-80px; }
+  .bg-blob.b2{ width:220px; height:220px; background:var(--blob2); bottom:-40px; right:-60px; animation-delay:2s; }
+  @keyframes drift{
+    0%,100%{ transform:translate(0,0) scale(1); }
+    50%{ transform:translate(14px,-12px) scale(1.05); }
+  }
+  .wrap{ position:relative; z-index:1; width:100%; display:flex; flex-direction:column; align-items:center; padding-top:28px; }
+  .hero{ text-align:center; margin-bottom:8px; animation:fadeDown 0.7s ease both; }
+  @keyframes fadeDown{ from{opacity:0; transform:translateY(-14px);} to{opacity:1; transform:translateY(0);} }
+  .teddy-stage{ width:120px; height:120px; margin:0 auto; position:relative; }
+  .speech-bubble{
+    position:absolute; top:-6px; right:-58px;
+    background:var(--surface);
+    border:2px solid var(--border);
+    padding:6px 12px;
+    border-radius:16px;
+    font-family:'Fredoka', sans-serif;
+    font-size:12px;
+    color:var(--coral-deep);
+    box-shadow:var(--shadow);
+    opacity:0; animation:popIn 0.5s ease 0.9s forwards;
+    white-space:nowrap;
+  }
+  .speech-bubble::after{
+    content:"";
+    position:absolute; left:-6px; bottom:10px;
+    width:0; height:0;
+    border:6px solid transparent;
+    border-right-color:var(--surface);
+  }
+  @keyframes popIn{ from{opacity:0; transform:scale(0.7) translateY(4px);} to{opacity:1; transform:scale(1) translateY(0);} }
+  .hero h1{
+    font-family:'Fredoka', sans-serif;
+    font-size:clamp(26px, 5vw, 34px);
+    font-weight:700;
+    margin-top:6px;
+    letter-spacing:-0.01em;
+  }
+  .hero h1 span{ color:var(--coral-deep); }
+  .hero p{ margin-top:4px; color:var(--ink-soft); font-size:14.5px; }
+  .chat-shell{
+    width:100%;
+    max-width:520px;
+    background:var(--surface);
+    border-radius:40px 40px 32px 32px;
+    box-shadow:var(--shadow);
+    margin-top:18px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    height:min(60vh, 520px);
+    animation:fadeUp 0.8s ease both 0.1s;
+    border:1px solid var(--border);
+  }
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:translateY(0);} }
+  .chat-header{
+    padding:16px 22px 22px;
+    background:linear-gradient(135deg, var(--honey-light), var(--blob2));
+    position:relative;
+  }
+  .chat-header .row{ display:flex; align-items:center; gap:10px; }
+  .chat-header b{ font-family:'Fredoka', sans-serif; font-size:15px; }
+  .chat-header .row div span{ font-size:11.5px; color:var(--ink-soft); display:block; }
+  .mini-status{ display:flex; align-items:center; gap:5px; font-size:11px; }
+  .mini-status .dot{ width:6px; height:6px; border-radius:50%; background:#3FBE7C; animation:pulseDot 1.8s infinite; }
+  @keyframes pulseDot{
+    0%{box-shadow:0 0 0 0 rgba(63,190,124,0.5);}
+    70%{box-shadow:0 0 0 6px rgba(63,190,124,0);}
+    100%{box-shadow:0 0 0 0 rgba(63,190,124,0);}
+  }
+  .wave-divider{ display:block; margin-top:-1px; width:100%; height:22px; }
+  .messages{
+    flex:1; overflow-y:auto; padding:16px 18px;
+    display:flex; flex-direction:column; gap:10px;
+    background:var(--surface);
+  }
+  .messages::-webkit-scrollbar{ width:6px; }
+  .messages::-webkit-scrollbar-thumb{ background:var(--border); border-radius:10px; }
+  .msg{
+    max-width:78%; padding:10px 15px; font-size:14.5px; line-height:1.5;
+    animation:slideIn 0.35s ease both;
+  }
+  @keyframes slideIn{ from{opacity:0; transform:translateY(8px) scale(0.98);} to{opacity:1; transform:translateY(0) scale(1);} }
+  .msg.bot{
+    align-self:flex-start;
+    background:#FFF1E6;
+    border-radius:18px 18px 18px 4px;
+  }
+  .msg.user{
+    align-self:flex-end;
+    background:linear-gradient(135deg,var(--violet), #7C6AE8);
+    color:#fff;
+    border-radius:18px 18px 4px 18px;
+  }
+  .typing{ align-self:flex-start; display:flex; gap:4px; background:#FFF1E6; padding:12px 16px; border-radius:18px 18px 18px 4px; }
+  .typing span{ width:6px; height:6px; border-radius:50%; background:var(--honey); animation:bounce 1.2s infinite; }
+  .typing span:nth-child(2){ animation-delay:0.15s; }
+  .typing span:nth-child(3){ animation-delay:0.3s; }
+  @keyframes bounce{ 0%,60%,100%{ transform:translateY(0); opacity:0.5;} 30%{ transform:translateY(-5px); opacity:1;} }
+  .input-bar{ display:flex; align-items:center; gap:10px; padding:12px 16px 16px; border-top:1px solid var(--border); }
+  .input-bar input{
+    flex:1; border:2px solid var(--border); background:var(--bg);
+    border-radius:999px; padding:11px 18px; font-size:14.5px;
+    font-family:'Nunito',sans-serif; outline:none;
+    transition:border-color 0.2s, box-shadow 0.2s;
+  }
+  .input-bar input:focus{ border-color:var(--coral); box-shadow:0 0 0 3px rgba(255,138,115,0.15); }
+  .send-btn{
+    width:44px; height:44px; border:none; border-radius:50%;
+    background:linear-gradient(135deg,var(--coral),var(--coral-deep));
+    color:#fff; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:transform 0.15s ease, box-shadow 0.15s ease; flex-shrink:0;
+  }
+  .send-btn:hover{ transform:translateY(-2px) scale(1.05); box-shadow:0 8px 18px rgba(241,106,80,0.35); }
+  .send-btn:active{ transform:translateY(0) scale(0.96); }
+  .send-btn svg{ width:18px; height:18px; }
+  footer{ margin:16px 0 22px; font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--ink-soft); opacity:0.7; text-align:center; position:relative; z-index:1; }
+  @media (max-width:480px){
+    .chat-shell{ height:66vh; border-radius:30px 30px 24px 24px; }
+    .hero h1{ font-size:24px; }
+    .speech-bubble{ right:-46px; font-size:11px; }
+  }
+  @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
+</style>
 </head>
 <body>
 
-    <div class="chat-container">
-        <!-- Header -->
-        <div class="chat-header">
-            <div class="bot-avatar">
-                <i class="fa-solid fa-robot"></i>
-            </div>
-            <div class="bot-info">
-                <h3>Akki Bot AI</h3>
-                <div class="bot-status">
-                    <span class="status-dot"></span>
-                    <span>Online & Ready</span>
-                </div>
-            </div>
-        </div>
+<div class="bg-blob b1"></div>
+<div class="bg-blob b2"></div>
 
-        <!-- Messages Area -->
-        <div class="chat-messages" id="chatMessages">
-            <div class="message bot-msg">
-                Hello Akki! Main aapka customized AI assistant hoon. Main aaj aapki kya help kar sakta hoon?
-            </div>
-        </div>
+<div class="wrap">
+  <div class="hero">
+    <div class="teddy-stage">
+      <svg id="teddy" viewBox="0 0 200 200" width="120" height="120">
+        <g id="earL" style="transform-origin:52px 48px;">
+          <circle cx="52" cy="48" r="26" fill="var(--honey)"/>
+          <circle cx="52" cy="48" r="13" fill="var(--honey-light)"/>
+        </g>
+        <g id="earR" style="transform-origin:148px 48px;">
+          <circle cx="148" cy="48" r="26" fill="var(--honey)"/>
+          <circle cx="148" cy="48" r="13" fill="var(--honey-light)"/>
+        </g>
+        <circle cx="100" cy="105" r="70" fill="var(--honey)"/>
+        <ellipse cx="100" cy="128" rx="34" ry="26" fill="var(--honey-light)"/>
+        <g id="eyeL" style="transform-origin:78px 100px;">
+          <circle cx="78" cy="100" r="9" fill="#3B2E27"/>
+          <circle cx="81" cy="97" r="3" fill="#fff"/>
+        </g>
+        <g id="eyeR" style="transform-origin:122px 100px;">
+          <circle cx="122" cy="100" r="9" fill="#3B2E27"/>
+          <circle cx="125" cy="97" r="3" fill="#fff"/>
+        </g>
+        <ellipse cx="100" cy="118" rx="8" ry="6" fill="#3B2E27"/>
+        <path id="mouth" d="M 84 134 Q 100 144 116 134" stroke="#3B2E27" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <g id="armR" style="transform-origin:162px 150px;">
+          <ellipse cx="168" cy="152" rx="14" ry="20" fill="var(--honey)"/>
+        </g>
+      </svg>
+      <div class="speech-bubble" id="speechBubble">Hi, main hoon!</div>
+    </div>
+    <h1>Meet <span>Akki Bot</span></h1>
+    <p>Poke it, talk to it — it actually reacts 🐻</p>
+  </div>
 
-        <!-- Input Box -->
-        <div class="chat-input-area">
-            <div class="input-wrapper">
-                <input type="text" id="userInput" placeholder="Type a professional message..." autocomplete="off">
-            </div>
-            <button class="send-btn" id="sendBtn">
-                <i class="fa-solid fa-paper-plane"></i>
-            </button>
+  <div class="chat-shell">
+    <div class="chat-header">
+      <div class="row">
+        <div>
+          <b>Akki Bot</b>
+          <div class="mini-status"><span class="dot"></span><span>Listening</span></div>
         </div>
+      </div>
+      <svg class="wave-divider" viewBox="0 0 500 30" preserveAspectRatio="none" style="position:absolute; bottom:-1px; left:0;">
+        <path d="M0,15 C125,35 375,-5 500,15 L500,30 L0,30 Z" fill="#FFFFFF"/>
+      </svg>
     </div>
 
-    <script>
-        const chatMessages = document.getElementById('chatMessages');
-        const userInput = document.getElementById('userInput');
-        const sendBtn = document.getElementById('sendBtn');
+    <div class="messages" id="messages">
+      <div class="msg bot">Hey! I'm Akki Bot 🐻 Type something and watch me react.</div>
+    </div>
 
-        async function sendMessage() {
-            const text = userInput.value.trim();
-            if (!text) return;
+    <div class="input-bar">
+      <input type="text" id="userInput" placeholder="Type your message..." autocomplete="off">
+      <button class="send-btn" id="sendBtn" aria-label="Send message">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
 
-            // Append User Message UI
-            appendMessage(text, 'user-msg');
-            userInput.value = '';
+  <footer>AKKI-BOT</footer>
+</div>
 
-            try {
-                // Fetch Request to your backend route
-                const response = await fetch('/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: text })
-                });
-                
-                const data = await response.json();
-                
-                // Append Bot Response UI
-                if (data.reply) {
-                    appendMessage(data.reply, 'bot-msg');
-                } else {
-                    appendMessage("Error: Something went wrong.", 'bot-msg');
-                }
-            } catch (error) {
-                appendMessage("Server unreachable. Please check connection.", 'bot-msg');
-            }
-        }
+<style>
+  #earL, #earR{ transition: transform 0.3s ease; }
+  #eyeL, #eyeR{ transition: transform 0.15s ease; }
+  #armR{ transition: transform 0.3s ease; }
+  body[data-state="idle"] #teddy{ animation: breathe 3.2s ease-in-out infinite; }
+  @keyframes breathe{ 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.02);} }
+  body[data-state="idle"] #eyeL, body[data-state="idle"] #eyeR{ animation: blink 4.5s ease-in-out infinite; }
+  @keyframes blink{ 0%,92%,100%{ transform:scaleY(1);} 95%{ transform:scaleY(0.1);} }
+  body[data-state="listening"] #earL{ transform:rotate(-8deg) scale(1.05); }
+  body[data-state="listening"] #earR{ transform:rotate(8deg) scale(1.05); }
+  body[data-state="listening"] #eyeL, body[data-state="listening"] #eyeR{ transform:translateY(-1px) scaleY(1.1); }
+  body[data-state="thinking"] #teddy{ animation: tilt 1.4s ease-in-out infinite; }
+  @keyframes tilt{ 0%,100%{ transform:rotate(0deg);} 50%{ transform:rotate(3deg);} }
+  body[data-state="thinking"] #mouth{ d: path("M 88 136 Q 100 132 112 136"); }
+  body[data-state="thinking"] #eyeL, body[data-state="thinking"] #eyeR{ transform:scaleY(0.5); }
+  body[data-state="talking"] #mouth{ animation: talk 0.4s ease-in-out infinite; }
+  @keyframes talk{
+    0%,100%{ d: path("M 84 134 Q 100 144 116 134"); }
+    50%{ d: path("M 88 132 Q 100 150 112 132"); }
+  }
+  body[data-state="talking"] #armR{ animation: wave 0.5s ease-in-out 2; }
+  @keyframes wave{ 0%,100%{ transform:rotate(0deg);} 50%{ transform:rotate(-20deg);} }
+</style>
 
-        // FIXED FUNCTION: Added missing element creation line
-        function appendMessage(text, className) {
-            const msgDiv = document.createElement('div');
-            msgDiv.classList.add('message', className);
-            msgDiv.innerText = text;
-            chatMessages.appendChild(msgDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight; // Auto Scroll to bottom
-        }
+<script>
+  const body = document.body;
+  const messagesEl = document.getElementById('messages');
+  const inputEl = document.getElementById('userInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const bubble = document.getElementById('speechBubble');
 
-        sendBtn.addEventListener('click', sendMessage);
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-    </script>
+  body.setAttribute('data-state', 'idle');
+  setTimeout(()=>{ bubble.style.opacity = '1'; }, 300);
+  setTimeout(()=>{ bubble.style.transition = 'opacity 0.5s'; bubble.style.opacity = '0'; }, 3500);
+
+  function setState(state){ body.setAttribute('data-state', state); }
+
+  inputEl.addEventListener('input', ()=>{
+    setState(inputEl.value.length ? 'listening' : 'idle');
+  });
+  inputEl.addEventListener('blur', ()=> setState('idle'));
+
+  function addMessage(text, sender){
+    const div = document.createElement('div');
+    div.className = 'msg ' + sender;
+    div.textContent = text;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function showTyping(){
+    const div = document.createElement('div');
+    div.className = 'typing';
+    div.id = 'typingIndicator';
+    div.innerHTML = '<span></span><span></span><span></span>';
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+  function hideTyping(){
+    const t = document.getElementById('typingIndicator');
+    if(t) t.remove();
+  }
+
+  async function getBotReply(userText){
+    return new Promise(resolve=>{
+      setTimeout(()=>{
+        resolve("Demo reply — connect getBotReply() to your Gemini backend for real answers.");
+      }, 1200);
+    });
+  }
+
+  async function handleSend(){
+    const text = inputEl.value.trim();
+    if(!text) return;
+    addMessage(text, 'user');
+    inputEl.value = '';
+    setState('thinking');
+    showTyping();
+    const reply = await getBotReply(text);
+    hideTyping();
+    setState('talking');
+    addMessage(reply, 'bot');
+    setTimeout(()=> setState('idle'), 900);
+  }
+
+  sendBtn.addEventListener('click', handleSend);
+  inputEl.addEventListener('keydown', e=>{ if(e.key === 'Enter') handleSend(); });
+
+  document.getElementById('teddy').addEventListener('click', ()=>{
+    setState('talking');
+    setTimeout(()=> setState('idle'), 1000);
+  });
+</script>
 </body>
 </html>
