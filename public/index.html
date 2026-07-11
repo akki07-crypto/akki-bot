@@ -269,7 +269,7 @@
                 // Append Bot Response UI
                 if (data.reply) {
                     appendMessage(data.reply, 'bot-msg');
-                } else if (data.error) {
+                } else {
                     appendMessage("Error: Something went wrong.", 'bot-msg');
                 }
             } catch (error) {
@@ -277,6 +277,7 @@
             }
         }
 
+        // FIXED FUNCTION: Added missing element creation line
         function appendMessage(text, className) {
             const msgDiv = document.createElement('div');
             msgDiv.classList.add('message', className);
