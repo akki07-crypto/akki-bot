@@ -24,18 +24,18 @@
   }
   .container { width: 100%; max-width: 500px; height: 100%; display: flex; flex-direction: column; }
   
-  /* FIXED HEADER LAYOUT (NO OVERLAPPING) */
+  /* FIXED HEADER STRUCTURE */
   .header { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--border); }
   .header-top { width: 100%; display: flex; justify-content: space-between; align-items: center; }
   .header-controls { display: flex; gap: 8px; align-items: center; }
   
   .control-btn { cursor: pointer; font-size: 18px; background: none; border: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
   
-  /* Premium Workspace & Mode Selectors */
-  .header-selectors { width: 100%; display: flex; gap: 8px; justify-content: transparent; }
+  .header-selectors { width: 100%; display: flex; gap: 8px; }
   select, .prompt-toggle-btn { 
-    background: var(--surface); border: 1.5px solid var(--border); padding: 5px 10px; 
+    flex: 1; background: var(--surface); border: 1.5px solid var(--border); padding: 6px 10px; 
     border-radius: 15px; font-size: 11px; font-weight: bold; color: var(--text); outline: none; cursor: pointer;
+    text-align: center;
   }
   .prompt-toggle-btn.active { background: var(--honey); color: white; border-color: var(--honey); }
 
@@ -56,17 +56,17 @@
   .msg.bot { background: var(--chat-bot); color: var(--text); border-bottom-left-radius: 4px; }
   .msg.user { background: var(--violet); color: white; border-bottom-right-radius: 4px; }
   
-  /* Timeline Table Styling */
+  /* Timeline Markdown Table Formatting */
   .blueprint-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; background: var(--surface); border-radius: 8px; overflow: hidden; }
   .blueprint-table th, .blueprint-table td { border: 1px solid var(--border); padding: 6px; text-align: left; }
   .blueprint-table th { background: var(--honey-light); color: #3B2E27; }
 
-  /* Flux AI Image Container */
-  .gen-img { width: 100%; max-width: 200px; border-radius: 10px; margin-top: 8px; border: 1px solid var(--border); display: block; }
+  /* Flux Engine Preview UI */
+  .gen-img { width: 100%; max-width: 220px; border-radius: 10px; margin-top: 8px; border: 1px solid var(--border); display: block; }
 
-  .action-buttons { display: flex; gap: 10px; margin-top: 8px; align-items: center; }
-  .inline-btn { background: none; border: none; cursor: pointer; font-size: 12px; opacity: 0.6; }
-  .inline-btn:hover { opacity: 1; }
+  .action-buttons { display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
+  .inline-btn { background: var(--surface); border: 1px solid var(--border); padding: 4px 8px; border-radius: 10px; cursor: pointer; font-size: 11px; font-weight: 600; color: var(--text); display: inline-flex; align-items: center; gap: 3px; }
+  .inline-btn:hover { background: var(--bg); }
   
   .preview-box { display: none; padding: 8px 15px; background: var(--bg); border-top: 1px solid var(--border); align-items: center; gap: 10px; }
   .preview-box img { height: 40px; border-radius: 5px; }
@@ -81,7 +81,6 @@
 <body data-theme="light">
 <div class="container">
   
-  <!-- NEW STRUCTURE: PREVENTS ELEMENT OVERLAPPING -->
   <div class="header">
     <div class="header-top">
       <h3 style="font-family: 'Fredoka';">Akki Bot Pro <span id="botFace">🐻</span></h3>
@@ -143,11 +142,10 @@
   let base64Image = null;
   muteToggle.textContent = isMuted ? '🔇' : '🔊';
 
-  // Get History Specific to Workspace
   function getHistory() {
     let allHistory = JSON.parse(localStorage.getItem('akki_workspaces')) || {};
     if (!allHistory[currentWorkspace]) {
-      allHistory[currentWorkspace] = [{ role: "bot", text: "Hello Akki Bhai! Welcome to this unique Workspace setup. State your target." }];
+      allHistory[currentWorkspace] = [{ role: "bot", text: "Hello Akki Bhai! Welcome to your advanced Workspace. Main abhi fully optimized hoon!" }];
     }
     return allHistory[currentWorkspace];
   }
@@ -158,7 +156,6 @@
     localStorage.setItem('akki_workspaces', JSON.stringify(allHistory));
   }
 
-  // Workspace Switcher Trigger
   workspaceSelect.addEventListener('change', (e) => {
     currentWorkspace = e.target.value;
     render();
@@ -183,26 +180,29 @@
     themeToggle.textContent = isDark ? '☀️' : '🌙';
   });
 
-  // Dynamic Markdown & Visual Timeline Parser Engine
   function formatMarkdown(text) {
     if (text.includes('|') && text.includes('---')) {
       let lines = text.trim().split('\n');
-      let tableHtml = '<table class="blueprint-table"><thead><tr>';
+      let tableHtml = '<table class="blueprint-table"><thead>';
       let startTable = false;
+      let hasBody = false;
       
       lines.forEach((line) => {
         if (line.includes('|')) {
           let cols = line.split('|').map(c => c.trim()).filter(c => c !== '');
           if (line.includes('---')) return;
           if (!startTable) {
-            tableHtml += cols.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>';
+            tableHtml += '<tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>';
             startTable = true;
+            hasBody = true;
           } else {
             tableHtml += '<tr>' + cols.map(c => `<td>${c}</td>`).join('') + '</tr>';
           }
         }
       });
-      return tableHtml + '</tbody></table>';
+      if(hasBody) tableHtml += '</tbody>';
+      tableHtml += '</table>';
+      return tableHtml;
     }
 
     return text
@@ -211,7 +211,7 @@
       .replace(/\n/g, '<br>');
   }
 
-  // Master UI Renderer
+  // FIXED RENDER ENGINE - PURE TEXT/HTML FOR BUTTONS
   function render() {
     messagesEl.innerHTML = '';
     let history = getHistory();
@@ -240,24 +240,27 @@
         btnWrapper.className = 'action-buttons';
         
         const ttsBtn = document.createElement('button');
-        ttsBtn.className = 'inline-btn'; ttsBtn.textContent = '🗣️';
+        ttsBtn.className = 'inline-btn';
+        ttsBtn.innerHTML = '🗣️ Listen'; 
         ttsBtn.onclick = () => speak(m.text, true); 
         btnWrapper.appendChild(ttsBtn);
 
         const copyBtn = document.createElement('button');
-        copyBtn.className = 'inline-btn'; copyBtn.textContent = '📋';
+        copyBtn.className = 'inline-btn';
+        copyBtn.innerHTML = '📋 Copy'; 
         copyBtn.onclick = () => {
           navigator.clipboard.writeText(m.text);
-          copyBtn.textContent = '✅';
-          setTimeout(() => copyBtn.textContent = '📋', 1500);
+          copyBtn.innerHTML = '✅ Copied';
+          setTimeout(() => copyBtn.innerHTML = '📋 Copy', 1500);
         };
         btnWrapper.appendChild(copyBtn);
 
         if(promptMode === 'video' || m.text.length > 30) {
           const imgBtn = document.createElement('button');
-          imgBtn.className = 'inline-btn'; imgBtn.textContent = '🎨 Gen Image';
+          imgBtn.className = 'inline-btn';
+          imgBtn.innerHTML = '🎨 Gen Image'; 
           imgBtn.onclick = async () => {
-            imgBtn.textContent = '⏳ Drawing...';
+            imgBtn.innerHTML = '⏳ Drawing...';
             const cleanPrompt = encodeURIComponent(m.text.substring(0, 80));
             const seed = Math.floor(Math.random() * 100000);
             const generatedUrl = `https://image.pollinations.ai/p/${cleanPrompt}?width=500&height=500&seed=${seed}&nologo=true`;
@@ -275,7 +278,6 @@
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
-  // Typewriter Streaming
   function streamBotReply(fullText) {
     botFace.textContent = '🧐';
     let history = getHistory();
@@ -340,26 +342,61 @@
 
   removeImgBtn.addEventListener('click', () => { base64Image = null; previewBox.style.display = 'none'; });
 
+  // FIXED HANDLE SEND - SAVE HISTORY IMMEDIATELY TO PREVENT DISAPPEARING
   async function handleSend() {
     const text = inputEl.value.trim();
     if(!text && !base64Image) return;
     
     let history = getHistory();
     history.push({role: 'user', text: text || "Sent an image 🖼️"});
+    
+    // Immediate save fix
+    saveHistory(history); 
+    
     inputEl.value = '';
-    if(base64Image) removeImgBtn.click();
+    const activeImage = base64Image;
+    if(activeImage) {
+      base64Image = null;
+      fileInput.value = '';
+      previewBox.style.display = 'none';
+    }
     
     render();
     botFace.textContent = '🤔';
 
+    const match = text.toLowerCase();
+    if(match.includes('time') || match.includes('samay') || match.includes('waqt')) {
+      const liveTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });
+      const reply = `Akki Bhai, abhi time ho raha hai: ${liveTime} 🕒`;
+      streamBotReply(reply);
+      return;
+    }
+
     let systemPrompt = "You are Akki Bot Pro, an elite creator AI. If the user asks for a script or timeline blueprint, respond using standard markdown tables with columns: Time | Visual Prompt | Audio Voiceover.";
     if (promptMode === 'video') {
-      systemPrompt += " Generate ultra-detailed cinematic 4K video prompting configurations.";
+      systemPrompt = "You are Akki Bot Pro, an elite AI Video Production and Prompt Engineering expert created by Akki (Gernative Akki). Your sole job is to generate cinematic, ultra-detailed 4K prompt frameworks for tools like Midjourney, Runway, and Sora. If giving a script, always use a markdown table with columns: Time | Visual Prompt | Audio Voiceover.";
+    }
+
+    let apiMessages = [{ role: "system", content: systemPrompt }];
+    history.slice(-6, -1).forEach(h => {
+      apiMessages.push({ role: h.role, content: h.text });
+    });
+
+    if (activeImage) {
+      apiMessages.push({
+        role: "user",
+        content: [
+          { type: "text", text: text || "Analyze this image." },
+          { type: "image_url", image_url: { url: `data:image/jpeg;base64,${activeImage}` } }
+        ]
+      });
+    } else {
+      apiMessages.push({ role: "user", content: text });
     }
 
     let payload = {
-      model: base64Image ? "llama-3.2-11b-vision-preview" : "llama-3.3-70b-versatile",
-      messages: [{ role: "system", content: systemPrompt }, { role: "user", content: text }],
+      model: activeImage ? "llama-3.2-11b-vision-preview" : "llama-3.3-70b-versatile",
+      messages: apiMessages,
       temperature: 0.7
     };
 
