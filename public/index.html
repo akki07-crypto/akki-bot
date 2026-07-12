@@ -23,63 +23,83 @@
     overflow: hidden; padding: 10px;
   }
   .container { width: 100%; max-width: 500px; height: 100%; display: flex; flex-direction: column; }
-  .header { text-align: center; padding: 10px 0; position: relative; display: flex; justify-content: center; align-items: center; gap: 15px; }
   
-  .controls-wrapper { position: absolute; right: 0; top: 10px; display: flex; gap: 10px; align-items: center; }
-  .control-btn { cursor: pointer; font-size: 20px; background: none; border: none; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; }
+  /* FIXED HEADER LAYOUT (NO OVERLAPPING) */
+  .header { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .header-top { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+  .header-controls { display: flex; gap: 8px; align-items: center; }
   
-  /* Prompt Mode Toggle Switch */
-  .prompt-toggle-btn { background: var(--border); border: 2px solid var(--honey); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; cursor: pointer; color: var(--text); }
-  .prompt-toggle-btn.active { background: var(--honey); color: white; }
+  .control-btn { cursor: pointer; font-size: 18px; background: none; border: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+  
+  /* Premium Workspace & Mode Selectors */
+  .header-selectors { width: 100%; display: flex; gap: 8px; justify-content: transparent; }
+  select, .prompt-toggle-btn { 
+    background: var(--surface); border: 1.5px solid var(--border); padding: 5px 10px; 
+    border-radius: 15px; font-size: 11px; font-weight: bold; color: var(--text); outline: none; cursor: pointer;
+  }
+  .prompt-toggle-btn.active { background: var(--honey); color: white; border-color: var(--honey); }
 
   .chat-shell {
-    flex: 1; background: var(--surface); border-radius: 30px;
+    flex: 1; background: var(--surface); border-radius: 25px; margin-top: 10px;
     display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--border);
   }
-  .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+  .messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 16px; }
   
-  .msg-row { display: flex; width: 100%; gap: 10px; align-items: flex-end; position: relative; }
+  .msg-row { display: flex; width: 100%; gap: 10px; align-items: flex-end; }
   .msg-row.user { flex-direction: row-reverse; }
   
-  /* Animated Avatar Setup */
-  .avatar { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; border: 1px solid var(--border); }
-  .msg-row.bot .avatar { background: var(--chat-bot); animation: pulse 2s infinite ease-in-out; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; border: 1px solid var(--border); }
+  .msg-row.bot .avatar { background: var(--chat-bot); }
   .msg-row.user .avatar { background: var(--violet); color: white; }
 
-  @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-  }
-
-  .msg { max-width: 75%; padding: 12px 16px; border-radius: 18px; font-size: 14.5px; line-height: 1.45; word-break: break-word; position: relative; }
+  .msg { max-width: 78%; padding: 12px 16px; border-radius: 18px; font-size: 14px; line-height: 1.45; word-break: break-word; }
   .msg.bot { background: var(--chat-bot); color: var(--text); border-bottom-left-radius: 4px; }
   .msg.user { background: var(--violet); color: white; border-bottom-right-radius: 4px; }
   
-  .action-buttons { display: flex; gap: 8px; margin-top: 6px; align-items: center; }
-  .inline-btn { background: none; border: none; cursor: pointer; font-size: 13px; opacity: 0.5; transition: opacity 0.2s; }
+  /* Timeline Table Styling */
+  .blueprint-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; background: var(--surface); border-radius: 8px; overflow: hidden; }
+  .blueprint-table th, .blueprint-table td { border: 1px solid var(--border); padding: 6px; text-align: left; }
+  .blueprint-table th { background: var(--honey-light); color: #3B2E27; }
+
+  /* Flux AI Image Container */
+  .gen-img { width: 100%; max-width: 200px; border-radius: 10px; margin-top: 8px; border: 1px solid var(--border); display: block; }
+
+  .action-buttons { display: flex; gap: 10px; margin-top: 8px; align-items: center; }
+  .inline-btn { background: none; border: none; cursor: pointer; font-size: 12px; opacity: 0.6; }
   .inline-btn:hover { opacity: 1; }
   
   .preview-box { display: none; padding: 8px 15px; background: var(--bg); border-top: 1px solid var(--border); align-items: center; gap: 10px; }
   .preview-box img { height: 40px; border-radius: 5px; }
   .preview-box button { background: none; border: none; color: var(--coral-deep); font-weight: bold; cursor: pointer; }
 
-  .input-area { padding: 15px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 8px; background: var(--surface); }
-  input[type="text"] { flex: 1; padding: 12px 18px; border-radius: 25px; border: 2px solid var(--border); background: var(--surface); color: var(--text); outline: none; }
-  .icon-btn, .send-btn { width: 42px; height: 42px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .input-area { padding: 12px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 8px; background: var(--surface); }
+  input[type="text"] { flex: 1; padding: 10px 16px; border-radius: 20px; border: 2px solid var(--border); background: var(--surface); color: var(--text); outline: none; }
+  .icon-btn, .send-btn { width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
   .send-btn { background: var(--coral-deep); color: white; }
 </style>
 </head>
 <body data-theme="light">
 <div class="container">
+  
+  <!-- NEW STRUCTURE: PREVENTS ELEMENT OVERLAPPING -->
   <div class="header">
-    <h3 style="font-family: 'Fredoka';">Akki Bot Pro <span id="botFace">🐻</span></h3>
-    <div class="controls-wrapper">
-      <button class="prompt-toggle-btn" id="promptModeToggle">🤖 NORMAL MODE</button>
-      <button class="control-btn" id="muteToggle" title="Mute/Unmute Speech">🔊</button>
-      <button class="control-btn" id="themeToggle" title="Toggle Dark Mode">☀️</button>
+    <div class="header-top">
+      <h3 style="font-family: 'Fredoka';">Akki Bot Pro <span id="botFace">🐻</span></h3>
+      <div class="header-controls">
+        <button class="control-btn" id="muteToggle" title="Mute/Unmute">🔊</button>
+        <button class="control-btn" id="themeToggle" title="Theme">☀️</button>
+      </div>
+    </div>
+    <div class="header-selectors">
+      <select id="workspaceSelect">
+        <option value="default">📁 Workspace: General</option>
+        <option value="monster">🎬 Workspace: Monster Cinematic</option>
+        <option value="thriller">🧠 Workspace: Psychological Thriller</option>
+      </select>
+      <button class="prompt-toggle-btn" id="promptModeToggle">🤖 NORMAL CHAT</button>
     </div>
   </div>
+
   <div class="chat-shell">
     <div class="messages" id="messages"></div>
     
@@ -102,12 +122,9 @@
 <script>
   const buildKey = () => "gsk_ND2eENV0" + "uOwTJ1ulrZsZ" + "WGdyb3FYNogr" + "Sf2Up5jWLsntS" + "2ihRsAe";
   
-  let chatHistory = JSON.parse(localStorage.getItem('akki_bot_history')) || [
-    { role: "bot", text: "Hello! Main Akki Bot Pro hoon. Memory, Vision, Voice aur Video Prompting engine ke sath ready!" }
-  ];
-  
+  let currentWorkspace = 'default';
   let isMuted = localStorage.getItem('akki_bot_muted') === 'true';
-  let promptMode = localStorage.getItem('akki_prompt_mode') || 'normal'; // normal or video
+  let promptMode = 'normal'; 
 
   const messagesEl = document.getElementById('messages');
   const inputEl = document.getElementById('userInput');
@@ -115,34 +132,42 @@
   const themeToggle = document.getElementById('themeToggle');
   const muteToggle = document.getElementById('muteToggle');
   const promptModeToggle = document.getElementById('promptModeToggle');
+  const workspaceSelect = document.getElementById('workspaceSelect');
   const fileInput = document.getElementById('fileInput');
   const previewBox = document.getElementById('previewBox');
   const imgPreview = document.getElementById('imgPreview');
-  const imgName = document.getElementById('imgName');
   const removeImgBtn = document.getElementById('removeImgBtn');
   const voiceBtn = document.getElementById('voiceBtn');
   const botFace = document.getElementById('botFace');
 
   let base64Image = null;
-
-  // Initial Sync Logic
   muteToggle.textContent = isMuted ? '🔇' : '🔊';
-  updatePromptToggleUI();
 
-  function updatePromptToggleUI() {
-    if(promptMode === 'video') {
-      promptModeToggle.textContent = "🎬 PROMPT MODE";
-      promptModeToggle.classList.add('active');
-    } else {
-      promptModeToggle.textContent = "🤖 NORMAL MODE";
-      promptModeToggle.classList.remove('active');
+  // Get History Specific to Workspace
+  function getHistory() {
+    let allHistory = JSON.parse(localStorage.getItem('akki_workspaces')) || {};
+    if (!allHistory[currentWorkspace]) {
+      allHistory[currentWorkspace] = [{ role: "bot", text: "Hello Akki Bhai! Welcome to this unique Workspace setup. State your target." }];
     }
+    return allHistory[currentWorkspace];
   }
+
+  function saveHistory(history) {
+    let allHistory = JSON.parse(localStorage.getItem('akki_workspaces')) || {};
+    allHistory[currentWorkspace] = history;
+    localStorage.setItem('akki_workspaces', JSON.stringify(allHistory));
+  }
+
+  // Workspace Switcher Trigger
+  workspaceSelect.addEventListener('change', (e) => {
+    currentWorkspace = e.target.value;
+    render();
+  });
 
   promptModeToggle.addEventListener('click', () => {
     promptMode = promptMode === 'normal' ? 'video' : 'normal';
-    localStorage.setItem('akki_prompt_mode', promptMode);
-    updatePromptToggleUI();
+    promptModeToggle.textContent = promptMode === 'video' ? "🎬 PROMPT MODE" : "🤖 NORMAL CHAT";
+    promptModeToggle.classList.toggle('active', promptMode === 'video');
   });
 
   muteToggle.addEventListener('click', () => {
@@ -158,8 +183,28 @@
     themeToggle.textContent = isDark ? '☀️' : '🌙';
   });
 
-  // Markdown formatting logic helper
+  // Dynamic Markdown & Visual Timeline Parser Engine
   function formatMarkdown(text) {
+    if (text.includes('|') && text.includes('---')) {
+      let lines = text.trim().split('\n');
+      let tableHtml = '<table class="blueprint-table"><thead><tr>';
+      let startTable = false;
+      
+      lines.forEach((line) => {
+        if (line.includes('|')) {
+          let cols = line.split('|').map(c => c.trim()).filter(c => c !== '');
+          if (line.includes('---')) return;
+          if (!startTable) {
+            tableHtml += cols.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>';
+            startTable = true;
+          } else {
+            tableHtml += '<tr>' + cols.map(c => `<td>${c}</td>`).join('') + '</tr>';
+          }
+        }
+      });
+      return tableHtml + '</tbody></table>';
+    }
+
     return text
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
@@ -169,7 +214,8 @@
   // Master UI Renderer
   function render() {
     messagesEl.innerHTML = '';
-    chatHistory.forEach((m, idx) => {
+    let history = getHistory();
+    history.forEach((m) => {
       const row = document.createElement('div');
       row.className = `msg-row ${m.role}`;
 
@@ -182,47 +228,62 @@
       d.className = `msg ${m.role}`;
       d.innerHTML = formatMarkdown(m.text);
       
+      if(m.imageGenUrl) {
+        const img = document.createElement('img');
+        img.src = m.imageGenUrl;
+        img.className = 'gen-img';
+        d.appendChild(img);
+      }
+
       if(m.role === 'bot') {
         const btnWrapper = document.createElement('div');
         btnWrapper.className = 'action-buttons';
         
-        // Speak Trigger
         const ttsBtn = document.createElement('button');
-        ttsBtn.className = 'inline-btn';
-        ttsBtn.textContent = '🗣️';
+        ttsBtn.className = 'inline-btn'; ttsBtn.textContent = '🗣️';
         ttsBtn.onclick = () => speak(m.text, true); 
         btnWrapper.appendChild(ttsBtn);
 
-        // Copy Clipboard Trigger
         const copyBtn = document.createElement('button');
-        copyBtn.className = 'inline-btn';
-        copyBtn.textContent = '📋';
-        copyBtn.title = "Copy text";
+        copyBtn.className = 'inline-btn'; copyBtn.textContent = '📋';
         copyBtn.onclick = () => {
           navigator.clipboard.writeText(m.text);
           copyBtn.textContent = '✅';
           setTimeout(() => copyBtn.textContent = '📋', 1500);
         };
         btnWrapper.appendChild(copyBtn);
-        
+
+        if(promptMode === 'video' || m.text.length > 30) {
+          const imgBtn = document.createElement('button');
+          imgBtn.className = 'inline-btn'; imgBtn.textContent = '🎨 Gen Image';
+          imgBtn.onclick = async () => {
+            imgBtn.textContent = '⏳ Drawing...';
+            const cleanPrompt = encodeURIComponent(m.text.substring(0, 80));
+            const seed = Math.floor(Math.random() * 100000);
+            const generatedUrl = `https://image.pollinations.ai/p/${cleanPrompt}?width=500&height=500&seed=${seed}&nologo=true`;
+            m.imageGenUrl = generatedUrl;
+            saveHistory(history);
+            render();
+          };
+          btnWrapper.appendChild(imgBtn);
+        }
         d.appendChild(btnWrapper);
       }
-      
       row.appendChild(d);
       messagesEl.appendChild(row);
     });
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
-  // Typewriter Streaming Engine Simulation
+  // Typewriter Streaming
   function streamBotReply(fullText) {
-    botFace.textContent = '🧐'; // Change face to thinking/speaking state
+    botFace.textContent = '🧐';
+    let history = getHistory();
+    
     const row = document.createElement('div');
     row.className = 'msg-row bot';
-
     const avatar = document.createElement('div');
-    avatar.className = 'avatar';
-    avatar.textContent = '🐻';
+    avatar.className = 'avatar'; avatar.textContent = '🐻';
     row.appendChild(avatar);
 
     const d = document.createElement('div');
@@ -231,7 +292,6 @@
     messagesEl.appendChild(row);
     
     let currentIdx = 0;
-    // Speed optimization mapping rule array
     const words = fullText.split(' ');
     
     function typeWord() {
@@ -239,13 +299,12 @@
         d.innerHTML = formatMarkdown(words.slice(0, currentIdx + 1).join(' '));
         messagesEl.scrollTop = messagesEl.scrollHeight;
         currentIdx++;
-        setTimeout(typeWord, 40); // 40ms dynamic delay per word stream
+        setTimeout(typeWord, 35);
       } else {
-        // Stream completed process injection
-        botFace.textContent = '🐻'; // Back to standard face avatar
-        chatHistory.push({role: 'bot', text: fullText});
-        localStorage.setItem('akki_bot_history', JSON.stringify(chatHistory));
-        render(); // Clean rebuild with complete button event attachments
+        botFace.textContent = '🐻';
+        history.push({role: 'bot', text: fullText});
+        saveHistory(history);
+        render();
         speak(fullText);
       }
     }
@@ -261,23 +320,14 @@
     synth.speak(utterance);
   }
 
-  // Mic STT Trigger React Actions
   const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
   rec.lang = 'hi-IN';
-  voiceBtn.onclick = () => {
-    botFace.textContent = '👂'; // Change expression to listening
-    rec.start();
-  };
-  rec.onresult = (e) => {
-    inputEl.value = e.results[0][0].transcript;
-    botFace.textContent = '🐻';
-  };
-  rec.onerror = () => botFace.textContent = '🐻';
+  voiceBtn.onclick = () => { botFace.textContent = '👂'; rec.start(); };
+  rec.onresult = (e) => { inputEl.value = e.results[0][0].transcript; botFace.textContent = '🐻'; };
 
   fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
-      imgName.textContent = file.name.substring(0, 10) + "...";
       const reader = new FileReader();
       reader.onload = function(evt) {
         imgPreview.src = evt.target.result;
@@ -288,57 +338,30 @@
     }
   });
 
-  removeImgBtn.addEventListener('click', () => {
-    base64Image = null;
-    fileInput.value = '';
-    previewBox.style.display = 'none';
-  });
+  removeImgBtn.addEventListener('click', () => { base64Image = null; previewBox.style.display = 'none'; });
 
   async function handleSend() {
     const text = inputEl.value.trim();
     if(!text && !base64Image) return;
     
-    chatHistory.push({role: 'user', text: text || "Sent an image 🖼️"});
+    let history = getHistory();
+    history.push({role: 'user', text: text || "Sent an image 🖼️"});
     inputEl.value = '';
-    
-    const activeImage = base64Image;
-    if(activeImage) removeImgBtn.click();
+    if(base64Image) removeImgBtn.click();
     
     render();
-    botFace.textContent = '🤔'; // Thinking Face on fetch API triggered
+    botFace.textContent = '🤔';
 
-    // Local Tool Check (MCP Lite)
-    const match = text.toLowerCase();
-    if(match.includes('time') || match.includes('samay') || match.includes('waqt')) {
-      const liveTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });
-      const reply = `Akki Bhai, abhi time ho raha hai: ${liveTime} 🕒`;
-      streamBotReply(reply);
-      return;
-    }
-
-    // Dynamic Context Switch Routing (Normal vs Video Prompt Mode)
-    let systemPrompt = "You are Akki Bot Pro, a creative assistant with system memory, tools, and vision skills. Keep answers crisp.";
+    let systemPrompt = "You are Akki Bot Pro, an elite creator AI. If the user asks for a script or timeline blueprint, respond using standard markdown tables with columns: Time | Visual Prompt | Audio Voiceover.";
     if (promptMode === 'video') {
-      systemPrompt = "You are Akki Bot Pro, an elite AI Video Production and Prompt Engineering expert created by Akki (Gernative Akki). Your sole job is to generate cinematic, ultra-detailed 4K prompt frameworks for tools like Midjourney, Runway, and Sora. Focus heavily on lighting, dynamic fight scenes, high-fidelity camera angles, and hyper-realistic scene composition.";
+      systemPrompt += " Generate ultra-detailed cinematic 4K video prompting configurations.";
     }
 
     let payload = {
-      model: activeImage ? "llama-3.2-11b-vision-preview" : "llama-3.3-70b-versatile",
-      messages: [{ role: "system", content: systemPrompt }],
+      model: base64Image ? "llama-3.2-11b-vision-preview" : "llama-3.3-70b-versatile",
+      messages: [{ role: "system", content: systemPrompt }, { role: "user", content: text }],
       temperature: 0.7
     };
-
-    if (activeImage) {
-      payload.messages.push({
-        role: "user",
-        content: [
-          { type: "text", text: text || "Analyze this image." },
-          { type: "image_url", image_url: { url: `data:image/jpeg;base64,${activeImage}` } }
-        ]
-      });
-    } else {
-      payload.messages.push({ role: "user", content: text });
-    }
 
     try {
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -347,11 +370,9 @@
         body: JSON.stringify(payload)
       });
       const data = await res.json();
-      const reply = data.choices[0].message.content;
-      
-      streamBotReply(reply);
+      streamBotReply(data.choices[0].message.content);
     } catch(e) { 
-      streamBotReply("System architecture data block face kar raha hai! 🐻");
+      streamBotReply("API Connection configuration error face kar raha hai! 🐻");
     }
   }
 
