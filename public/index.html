@@ -299,7 +299,6 @@
     typeWord();
   }
 
-  // DIRECT AUTOGEN IMAGE INSERTER ENGINE
   function triggerDirectImageGen(promptKeyword) {
     botFace.textContent = '🎨';
     let history = getHistory();
@@ -369,11 +368,15 @@
     
     render();
 
-    // --- AUTOMATIC AUTO-IMAGE ROUTER SYSTEM ---
+    // --- BULLETPROOF FUZZY SPELLING PROMPT FILTER FIX ---
     const match = text.toLowerCase();
-    if(!activeImage && (match.includes('generate') || match.includes('image') || match.includes('photo') || match.includes('draw') || match.includes('pic') || match.includes('banao'))) {
-      let subject = text.replace(/(generate|image|photo|draw|pic|banao|a|an|of|me|krke|do)/gi, "").trim();
-      if(subject.length === 0) subject = "Beautiful abstract dynamic concept artwork";
+    const imageKeywords = ['generate', 'gernate', 'image', 'photo', 'draw', 'pic', 'banao', 'picture', 'make'];
+    const triggerImage = imageKeywords.some(keyword => match.includes(keyword));
+
+    if(!activeImage && triggerImage) {
+      // Clean string thoroughly of all standard helper filler tokens
+      let subject = text.replace(/(generate|gernate|gernated|image|photo|draw|pic|picture|banao|make|a|an|of|me|krke|do|please)/gi, "").trim();
+      if(subject.length === 0) subject = "Beautiful cinematic prompt concept";
       triggerDirectImageGen(subject);
       return;
     }
