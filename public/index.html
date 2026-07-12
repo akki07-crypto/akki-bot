@@ -24,7 +24,6 @@
   }
   .container { width: 100%; max-width: 500px; height: 100%; display: flex; flex-direction: column; }
   
-  /* FIXED HEADER STRUCTURE */
   .header { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--border); }
   .header-top { width: 100%; display: flex; justify-content: space-between; align-items: center; }
   .header-controls { display: flex; gap: 8px; align-items: center; }
@@ -56,17 +55,14 @@
   .msg.bot { background: var(--chat-bot); color: var(--text); border-bottom-left-radius: 4px; }
   .msg.user { background: var(--violet); color: white; border-bottom-right-radius: 4px; }
   
-  /* Timeline Markdown Table Formatting */
   .blueprint-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; background: var(--surface); border-radius: 8px; overflow: hidden; }
   .blueprint-table th, .blueprint-table td { border: 1px solid var(--border); padding: 6px; text-align: left; }
   .blueprint-table th { background: var(--honey-light); color: #3B2E27; }
 
-  /* Flux Engine Preview UI */
   .gen-img { width: 100%; max-width: 220px; border-radius: 10px; margin-top: 8px; border: 1px solid var(--border); display: block; }
 
   .action-buttons { display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
-  .inline-btn { background: var(--surface); border: 1px solid var(--border); padding: 4px 8px; border-radius: 10px; cursor: pointer; font-size: 11px; font-weight: 600; color: var(--text); display: inline-flex; align-items: center; gap: 3px; }
-  .inline-btn:hover { background: var(--bg); }
+  .inline-btn { background: var(--bg); border: none; padding: 4px 8px; border-radius: 10px; cursor: pointer; font-size: 11px; font-weight: 600; color: var(--text); display: inline-flex; align-items: center; gap: 3px; }
   
   .preview-box { display: none; padding: 8px 15px; background: var(--bg); border-top: 1px solid var(--border); align-items: center; gap: 10px; }
   .preview-box img { height: 40px; border-radius: 5px; }
@@ -80,7 +76,6 @@
 </head>
 <body data-theme="light">
 <div class="container">
-  
   <div class="header">
     <div class="header-top">
       <h3 style="font-family: 'Fredoka';">Akki Bot Pro <span id="botFace">🐻</span></h3>
@@ -145,7 +140,7 @@
   function getHistory() {
     let allHistory = JSON.parse(localStorage.getItem('akki_workspaces')) || {};
     if (!allHistory[currentWorkspace]) {
-      allHistory[currentWorkspace] = [{ role: "bot", text: "Hello Akki Bhai! Welcome to your advanced Workspace. Main abhi fully optimized hoon!" }];
+      allHistory[currentWorkspace] = [{ role: "bot", text: "Hello Akki Bhai! Welcome to your advanced Workspace." }];
     }
     return allHistory[currentWorkspace];
   }
@@ -211,7 +206,6 @@
       .replace(/\n/g, '<br>');
   }
 
-  // FIXED RENDER ENGINE - PURE TEXT/HTML FOR BUTTONS
   function render() {
     messagesEl.innerHTML = '';
     let history = getHistory();
@@ -241,26 +235,26 @@
         
         const ttsBtn = document.createElement('button');
         ttsBtn.className = 'inline-btn';
-        ttsBtn.innerHTML = '🗣️ Listen'; 
+        ttsBtn.textContent = '🗣️ Listen'; 
         ttsBtn.onclick = () => speak(m.text, true); 
         btnWrapper.appendChild(ttsBtn);
 
         const copyBtn = document.createElement('button');
         copyBtn.className = 'inline-btn';
-        copyBtn.innerHTML = '📋 Copy'; 
+        copyBtn.textContent = '📋 Copy'; 
         copyBtn.onclick = () => {
           navigator.clipboard.writeText(m.text);
-          copyBtn.innerHTML = '✅ Copied';
-          setTimeout(() => copyBtn.innerHTML = '📋 Copy', 1500);
+          copyBtn.textContent = '✅ Copied';
+          setTimeout(() => copyBtn.textContent = '📋 Copy', 1500);
         };
         btnWrapper.appendChild(copyBtn);
 
         if(promptMode === 'video' || m.text.length > 30) {
           const imgBtn = document.createElement('button');
           imgBtn.className = 'inline-btn';
-          imgBtn.innerHTML = '🎨 Gen Image'; 
+          imgBtn.textContent = '🎨 Gen Image'; 
           imgBtn.onclick = async () => {
-            imgBtn.innerHTML = '⏳ Drawing...';
+            imgBtn.textContent = '⏳ Drawing...';
             const cleanPrompt = encodeURIComponent(m.text.substring(0, 80));
             const seed = Math.floor(Math.random() * 100000);
             const generatedUrl = `https://image.pollinations.ai/p/${cleanPrompt}?width=500&height=500&seed=${seed}&nologo=true`;
@@ -342,22 +336,18 @@
 
   removeImgBtn.addEventListener('click', () => { base64Image = null; previewBox.style.display = 'none'; });
 
-  // FIXED HANDLE SEND - SAVE HISTORY IMMEDIATELY TO PREVENT DISAPPEARING
   async function handleSend() {
     const text = inputEl.value.trim();
     if(!text && !base64Image) return;
     
     let history = getHistory();
     history.push({role: 'user', text: text || "Sent an image 🖼️"});
-    
-    // Immediate save fix
     saveHistory(history); 
     
     inputEl.value = '';
     const activeImage = base64Image;
     if(activeImage) {
       base64Image = null;
-      fileInput.value = '';
       previewBox.style.display = 'none';
     }
     
@@ -377,22 +367,13 @@
       systemPrompt = "You are Akki Bot Pro, an elite AI Video Production and Prompt Engineering expert created by Akki (Gernative Akki). Your sole job is to generate cinematic, ultra-detailed 4K prompt frameworks for tools like Midjourney, Runway, and Sora. If giving a script, always use a markdown table with columns: Time | Visual Prompt | Audio Voiceover.";
     }
 
+    // Fixed messaging array payload pipeline
     let apiMessages = [{ role: "system", content: systemPrompt }];
-    history.slice(-6, -1).forEach(h => {
-      apiMessages.push({ role: h.role, content: h.text });
+    history.slice(-5).forEach(h => {
+      if (h.text && !h.text.includes("API Connection configuration error")) {
+        apiMessages.push({ role: h.role === 'bot' ? 'assistant' : 'user', content: h.text });
+      }
     });
-
-    if (activeImage) {
-      apiMessages.push({
-        role: "user",
-        content: [
-          { type: "text", text: text || "Analyze this image." },
-          { type: "image_url", image_url: { url: `data:image/jpeg;base64,${activeImage}` } }
-        ]
-      });
-    } else {
-      apiMessages.push({ role: "user", content: text });
-    }
 
     let payload = {
       model: activeImage ? "llama-3.2-11b-vision-preview" : "llama-3.3-70b-versatile",
@@ -407,7 +388,11 @@
         body: JSON.stringify(payload)
       });
       const data = await res.json();
-      streamBotReply(data.choices[0].message.content);
+      if(data.choices && data.choices[0]) {
+        streamBotReply(data.choices[0].message.content);
+      } else {
+        streamBotReply("Groq returned empty choice payload.");
+      }
     } catch(e) { 
       streamBotReply("API Connection configuration error face kar raha hai! 🐻");
     }
