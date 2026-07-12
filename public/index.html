@@ -59,7 +59,7 @@
   .blueprint-table th, .blueprint-table td { border: 1px solid var(--border); padding: 6px; text-align: left; }
   .blueprint-table th { background: var(--honey-light); color: #3B2E27; }
 
-  .gen-img { width: 100%; max-width: 100%; border-radius: 12px; margin-top: 10px; border: 1px solid var(--border); display: block; }
+  .gen-img, .inline-user-img { width: 100%; max-width: 100%; border-radius: 12px; margin-top: 10px; border: 1px solid var(--border); display: block; }
 
   .action-buttons { display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
   .inline-btn { background: var(--bg); border: none; padding: 5px 10px; border-radius: 10px; cursor: pointer; font-size: 11px; font-weight: 600; color: var(--text); display: inline-flex; align-items: center; gap: 3px; }
@@ -99,7 +99,7 @@
     
     <div class="preview-box" id="previewBox">
       <img src="" id="imgPreview">
-      <span id="imgName"></span>
+      <span id="imgName" style="font-size: 12px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
       <button id="removeImgBtn">✕</button>
     </div>
 
@@ -140,7 +140,7 @@
   function getHistory() {
     let allHistory = JSON.parse(localStorage.getItem('akki_workspaces')) || {};
     if (!allHistory[currentWorkspace]) {
-      allHistory[currentWorkspace] = [{ role: "bot", text: "Hello Akki Bhai! Welcome to your advanced Workspace." }];
+      allHistory[currentWorkspace] = [{ role: "bot", text: "Hello Akki Bhai! Main aapka smart AI assistant hoon. Poochiye kya puchna hai ya fir boliyie koi image generate karne ko!" }];
     }
     return allHistory[currentWorkspace];
   }
@@ -222,6 +222,13 @@
       d.className = `msg ${m.role}`;
       d.innerHTML = formatMarkdown(m.text);
       
+      if(m.userUploadedImg) {
+        const uImg = document.createElement('img');
+        uImg.src = `data:image/jpeg;base64,${m.userUploadedImg}`;
+        uImg.className = 'inline-user-img';
+        d.appendChild(uImg);
+      }
+
       if(m.imageGenUrl) {
         const img = document.createElement('img');
         img.src = m.imageGenUrl;
@@ -248,23 +255,6 @@
           setTimeout(() => copyBtn.textContent = '📋 Copy', 1500);
         };
         btnWrapper.appendChild(copyBtn);
-
-        // --- FIX: HAR BOT MESSAGE KE NEECHE ALWAYS IMAGE GENERATOR DIKHEGA ---
-        const imgBtn = document.createElement('button');
-        imgBtn.className = 'inline-btn';
-        imgBtn.textContent = '🎨 Gen Image'; 
-        imgBtn.onclick = async () => {
-          imgBtn.textContent = '⏳ Drawing...';
-          // Filter table characters for clean prompt generation
-          let cleanText = m.text.replace(/\|/g, " ").replace(/---/g, " ").substring(0, 100);
-          const cleanPrompt = encodeURIComponent(cleanText.trim());
-          const seed = Math.floor(Math.random() * 100000);
-          const generatedUrl = `https://image.pollinations.ai/p/${cleanPrompt}?width=600&height=400&seed=${seed}&nologo=true`;
-          m.imageGenUrl = generatedUrl;
-          saveHistory(history);
-          render();
-        };
-        btnWrapper.appendChild(imgBtn);
         
         d.appendChild(btnWrapper);
       }
@@ -309,6 +299,24 @@
     typeWord();
   }
 
+  // DIRECT AUTOGEN IMAGE INSERTER ENGINE
+  function triggerDirectImageGen(promptKeyword) {
+    botFace.textContent = '🎨';
+    let history = getHistory();
+    const cleanPrompt = encodeURIComponent(promptKeyword.trim());
+    const seed = Math.floor(Math.random() * 100000);
+    const generatedUrl = `https://image.pollinations.ai/p/${cleanPrompt}?width=600&height=400&seed=${seed}&nologo=true`;
+    
+    history.push({
+      role: 'bot', 
+      text: `Bhai, aapke kehne par maine **"${promptKeyword}"** ki image generate kar di hai! 🚀`,
+      imageGenUrl: generatedUrl
+    });
+    saveHistory(history);
+    render();
+    botFace.textContent = '🐻';
+  }
+
   function speak(text, forceSpeak = false) {
     if (isMuted && !forceSpeak) return;
     window.speechSynthesis.cancel();
@@ -326,6 +334,7 @@
   fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
+      document.getElementById('imgName').textContent = file.name;
       const reader = new FileReader();
       reader.onload = function(evt) {
         imgPreview.src = evt.target.result;
@@ -336,46 +345,70 @@
     }
   });
 
-  removeImgBtn.addEventListener('click', () => { base64Image = null; previewBox.style.display = 'none'; });
+  removeImgBtn.addEventListener('click', () => { base64Image = null; previewBox.style.display = 'none'; fileInput.value = ''; });
 
   async function handleSend() {
     const text = inputEl.value.trim();
     if(!text && !base64Image) return;
     
     let history = getHistory();
-    history.push({role: 'user', text: text || "Sent an image 🖼️"});
+    let newMsg = {role: 'user', text: text || "Sent an image 🖼️"};
+    if(base64Image) {
+      newMsg.userUploadedImg = base64Image;
+    }
+    history.push(newMsg);
     saveHistory(history); 
     
     inputEl.value = '';
     const activeImage = base64Image;
     if(activeImage) {
       base64Image = null;
+      fileInput.value = '';
       previewBox.style.display = 'none';
     }
     
     render();
-    botFace.textContent = '🤔';
 
+    // --- AUTOMATIC AUTO-IMAGE ROUTER SYSTEM ---
     const match = text.toLowerCase();
-    if(match.includes('time') || match.includes('samay') || match.includes('waqt')) {
-      const liveTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });
-      const reply = `Akki Bhai, abhi time ho raha hai: ${liveTime} 🕒`;
-      streamBotReply(reply);
+    if(!activeImage && (match.includes('generate') || match.includes('image') || match.includes('photo') || match.includes('draw') || match.includes('pic') || match.includes('banao'))) {
+      let subject = text.replace(/(generate|image|photo|draw|pic|banao|a|an|of|me|krke|do)/gi, "").trim();
+      if(subject.length === 0) subject = "Beautiful abstract dynamic concept artwork";
+      triggerDirectImageGen(subject);
       return;
     }
 
-    // Smart Prompter Routing Logic
-    let systemPrompt = "You are Akki Bot Pro, an elite creator AI. If the user asks for a simple object or character image (like a dog, cat, car), do NOT make a table. Just write a descriptive cinematic prompt text. ONLY make a markdown table structure if they explicitly ask for a full video script, breakdown, or timeline project.";
+    botFace.textContent = '🤔';
+
+    if(match.includes('time') || match.includes('samay') || match.includes('waqt')) {
+      const liveTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });
+      streamBotReply(`Akki Bhai, abhi time ho raha hai: ${liveTime} 🕒`);
+      return;
+    }
+
+    let systemPrompt = "You are Akki Bot Pro, a friendly, ultra-smart conversational AI chatbot created by Akki (Gernative Akki). Answer naturally and professionally like a human peer chatbot helper. Only use markdown tables if the user explicitly asks for a full multi-scene script or video timeline blueprint.";
     if (promptMode === 'video') {
-      systemPrompt = "You are Akki Bot Pro, an elite AI Video Production and Prompt Engineering expert. Write high-fidelity ultra-detailed 4K rendering descriptions for creative visual items. Use tables ONLY for explicit full-length multi-scene video scripts.";
+      systemPrompt = "You are Akki Bot Pro, an elite expert AI Video Production Scriptwriter. Deliver structural scripts in tables when requested, or give cinematic prompts in regular prose.";
     }
 
     let apiMessages = [{ role: "system", content: systemPrompt }];
-    history.slice(-5).forEach(h => {
-      if (h.text && !h.text.includes("API Connection configuration error")) {
-        apiMessages.push({ role: h.role === 'bot' ? 'assistant' : 'user', content: h.text });
-      }
-    });
+    
+    if (activeImage) {
+      apiMessages.push({
+        role: "user",
+        content: [
+          { type: "text", text: text || "Bhai ye image check karo aur batao ye kya hai." },
+          { type: "image_url", image_url: { url: `data:image/jpeg;base64,${activeImage}` } }
+        ]
+      });
+    } else {
+      history.slice(-5).forEach(h => {
+        if (h.text && !h.text.includes("API Connection error") && !h.userUploadedImg) {
+          apiMessages.push({ role: h.role === 'bot' ? 'assistant' : 'user', content: h.text });
+        }
+      });
+      apiMessages.push({ role: "user", content: text });
+    }
 
     let payload = {
       model: activeImage ? "llama-3.2-11b-vision-preview" : "llama-3.3-70b-versatile",
