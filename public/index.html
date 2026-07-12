@@ -23,8 +23,10 @@
     overflow: hidden; padding: 10px;
   }
   .container { width: 100%; max-width: 500px; height: 100%; display: flex; flex-direction: column; }
-  .header { text-align: center; padding: 10px 0; position: relative; }
-  .theme-toggle { position: absolute; right: 0; top: 15px; cursor: pointer; font-size: 20px; background: none; border: none; }
+  .header { text-align: center; padding: 10px 0; position: relative; display: flex; justify-content: center; align-items: center; gap: 15px; }
+  
+  .controls-wrapper { position: absolute; right: 0; top: 10px; display: flex; gap: 10px; }
+  .control-btn { cursor: pointer; font-size: 20px; background: none; border: none; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; }
   
   .chat-shell {
     flex: 1; background: var(--surface); border-radius: 30px;
@@ -35,7 +37,8 @@
   .msg.bot { align-self: flex-start; background: var(--chat-bot); color: var(--text); }
   .msg.user { align-self: flex-end; background: var(--violet); color: white; }
   
-  .tts-btn { background: none; border: none; margin-left: 8px; cursor: pointer; font-size: 14px; }
+  .inline-speak-btn { background: none; border: none; margin-left: 8px; cursor: pointer; font-size: 14px; opacity: 0.6; }
+  .inline-speak-btn:hover { opacity: 1; }
   
   .preview-box { display: none; padding: 8px 15px; background: var(--bg); border-top: 1px solid var(--border); align-items: center; gap: 10px; }
   .preview-box img { height: 40px; border-radius: 5px; }
@@ -50,8 +53,11 @@
 <body data-theme="light">
 <div class="container">
   <div class="header">
-    <button class="theme-toggle" id="themeToggle">☀️</button>
     <h3 style="font-family: 'Fredoka';">Akki Bot Pro 🐻</h3>
+    <div class="controls-wrapper">
+      <button class="control-btn" id="muteToggle" title="Mute/Unmute Speech">🔊</button>
+      <button class="control-btn" id="themeToggle" title="Toggle Dark Mode">☀️</button>
+    </div>
   </div>
   <div class="chat-shell">
     <div class="messages" id="messages"></div>
@@ -79,26 +85,41 @@
     { role: "bot", text: "Hello! Main Akki Bot Pro hoon. Memory, Vision aur Voice tools ke sath ready!" }
   ];
   
+  let isMuted = localStorage.getItem('akki_bot_muted') === 'true';
+
   const messagesEl = document.getElementById('messages');
   const inputEl = document.getElementById('userInput');
   const sendBtn = document.getElementById('sendBtn');
   const themeToggle = document.getElementById('themeToggle');
+  const muteToggle = document.getElementById('muteToggle');
   const fileInput = document.getElementById('fileInput');
   const previewBox = document.getElementById('previewBox');
   const imgPreview = document.getElementById('imgPreview');
   const imgName = document.getElementById('imgName');
   const removeImgBtn = document.getElementById('removeImgBtn');
+  const voiceBtn = document.getElementById('voiceBtn');
 
   let base64Image = null;
 
-  // Theme Controller
+  // Sync initial mute icon
+  muteToggle.textContent = isMuted ? '🔇' : '🔊';
+
+  // Global Audio Switch
+  muteToggle.addEventListener('click', () => {
+    isMuted = !isMuted;
+    muteToggle.textContent = isMuted ? '🔇' : '🔊';
+    localStorage.setItem('akki_bot_muted', isMuted);
+    if(isMuted) window.speechSynthesis.cancel();
+  });
+
+  // Dark/Light Theme Switch
   themeToggle.addEventListener('click', () => {
     const isDark = document.body.getAttribute('data-theme') === 'dark';
     document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
     themeToggle.textContent = isDark ? '☀️' : '🌙';
   });
 
-  // Render UI Components
+  // Render Engine
   function render() {
     messagesEl.innerHTML = '';
     chatHistory.forEach(m => {
@@ -108,9 +129,9 @@
       
       if(m.role === 'bot') {
         const ttsBtn = document.createElement('button');
-        ttsBtn.className = 'tts-btn';
-        ttsBtn.textContent = '🔊';
-        ttsBtn.onclick = () => speak(m.text);
+        ttsBtn.className = 'inline-speak-btn';
+        ttsBtn.textContent = '🗣️';
+        ttsBtn.onclick = () => speak(m.text, true); 
         d.appendChild(ttsBtn);
       }
       messagesEl.appendChild(d);
@@ -118,21 +139,23 @@
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
-  // Text-To-Speech (Voice Reply)
-  function speak(text) {
+  // TTS Voice Output
+  function speak(text, forceSpeak = false) {
+    if (isMuted && !forceSpeak) return;
+    window.speechSynthesis.cancel();
     const synth = window.speechSynthesis;
     const utterance = new SpeechSynthesisUtterance(text.replace(/[^\w\s\u0900-\u097F]/g, ''));
     utterance.lang = 'hi-IN';
     synth.speak(utterance);
   }
 
-  // Voice Recognition (STT)
+  // STT Microphone Input
   const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
   rec.lang = 'hi-IN';
-  document.getElementById('voiceBtn').onclick = () => rec.start();
+  voiceBtn.onclick = () => rec.start();
   rec.onresult = (e) => inputEl.value = e.results[0][0].transcript;
 
-  // Image Selection Handling
+  // Image Preview Logic
   fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -153,7 +176,7 @@
     previewBox.style.display = 'none';
   });
 
-  // Message Sender Engine
+  // Data Submission Core
   async function handleSend() {
     const text = inputEl.value.trim();
     if(!text && !base64Image) return;
@@ -166,7 +189,7 @@
     
     render();
 
-    // Local Tool Check (MCP Lite)
+    // MCP Tools (Local Time/Date Bypass)
     const match = text.toLowerCase();
     if(match.includes('time') || match.includes('samay') || match.includes('waqt')) {
       const liveTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });
@@ -178,12 +201,9 @@
       return;
     }
 
-    // Dynamic Payload Compiler (Vision vs Text)
     let payload = {
       model: activeImage ? "llama-3.2-11b-vision-preview" : "llama-3.3-70b-versatile",
-      messages: [
-        { role: "system", content: "You are Akki Bot Pro, a creative assistant with system memory, tools, and vision skills. Keep answers crisp." }
-      ],
+      messages: [{ role: "system", content: "You are Akki Bot Pro, a creative assistant. Keep answers crisp." }],
       temperature: 0.7
     };
 
@@ -213,7 +233,7 @@
       localStorage.setItem('akki_bot_history', JSON.stringify(chatHistory));
       speak(reply);
     } catch(e) { 
-      chatHistory.push({role: 'bot', text: "Connection setup block face kar raha hai! 🐻"});
+      chatHistory.push({role: 'bot', text: "API load configuration block face kar raha hai! 🐻"});
       render();
     }
   }
